@@ -161,8 +161,7 @@ public class Player: CustomStringConvertible, Hashable, Equatable {
   }
   
   private func updateSelf(response: Response) throws {
-    // TODO: we should be able to compare the two players directly
-    guard response.player.name == self.name else {
+    guard response.player === self else {
       throw UpdateError.InvalidInput
     }
     
@@ -203,8 +202,7 @@ public class Player: CustomStringConvertible, Hashable, Equatable {
   }
   
   private func updateOther(response: Response) throws {
-    // TODO: we should be able to compare the two players directly
-    guard response.player.name != self.name else {
+    guard response.player !== self else {
       throw UpdateError.InvalidInput
     }
     
@@ -259,7 +257,7 @@ public class Player: CustomStringConvertible, Hashable, Equatable {
 }
 
 public func ==(lhs: Player, rhs: Player) -> Bool {
-  return lhs.name == rhs.name
+  return lhs === rhs
 }
 
 public class Board {
