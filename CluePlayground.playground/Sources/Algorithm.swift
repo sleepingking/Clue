@@ -128,7 +128,7 @@ public struct Response {
 
 // This kind of simulates one column on the note for one player
 // one Player struct keeps track of if we know which clues this player has
-public class Player: CustomStringConvertible {
+public class Player: CustomStringConvertible, Hashable, Equatable {
   
   public let name: String
   let numberOfClues: UInt
@@ -137,6 +137,10 @@ public class Player: CustomStringConvertible {
   
   public var description: String {
     return "\(name) with \(numberOfClues) clues"
+  }
+  
+  public var hashValue: Int {
+    return name.hashValue
   }
   
   public init(name: String, numberOfClues: UInt) {
@@ -254,11 +258,32 @@ public class Player: CustomStringConvertible {
   }
 }
 
+public func ==(lhs: Player, rhs: Player) -> Bool {
+  return lhs.name == rhs.name
+}
+
 public class Board {
   public let players: [Player]
   
-  public init(players: [Player]) {
+  public init(players: [Player], playing: Player, initialClues: [Clue]) throws {
     self.players = players
+    
+    guard players.contains(playing) else {
+      throw UpdateError.InvalidInput
+    }
+
+    guard playing.numberOfClues == UInt(initialClues.count) else {
+      throw UpdateError.InvalidInput
+    }
+
+    var otherPlayers = players
+    otherPlayers.removeAtIndex(otherPlayers.indexOf(playing)!)
+    for clue in initialClues {
+      try playing.update(clue, state: .Have)
+      for otherPlayer in otherPlayers {
+        try otherPlayer.update(clue, state: .NotHave)
+      }
+    }
   }
   
   public func update(response: Response) throws {
